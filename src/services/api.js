@@ -1,18 +1,31 @@
-const API_KEY = "680c867d02d823cf11b4edd4b2984f16";
-const BASE_URL = "https://api.themoviedb.org/3";
+const API_KEY = "3c72d7bc";
+const BASE_URL = "https://www.omdbapi.com/";
 
-
-export const getPopularMovies = async ()=>{
-    const response = await fetch(`${BASE_URL}/movie/popular?api_key=${API_KEY}`);
-    const data = await response.json();
-    return data.results
-}
-
-export const searchMovies = async (query)=>{
-    const response = await fetch(`${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(
-        query
-    )}`
+export const getPopularMovies = async () => {
+  try {
+    // OMDb doesn't have "popular", so use default search
+    const response = await fetch(
+      `https://www.omdbapi.com/?apikey=3c72d7bc&s=movie`
     );
+
     const data = await response.json();
-    return data.results
-}
+    return data.Search || [];
+  } catch (error) {
+    console.error("Error:", error);
+    return [];
+  }
+};
+
+export const searchMovies = async (query) => {
+  try {
+    const response = await fetch(
+      `${BASE_URL}?apikey=${API_KEY}&s=${encodeURIComponent(query)}`
+    );
+
+    const data = await response.json();
+    return data.Search || [];
+  } catch (error) {
+    console.error("Error:", error);
+    return [];
+  }
+};

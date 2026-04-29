@@ -1,73 +1,81 @@
-import MovieCard from "../Components/MovieCard.jsx"
-import {useState, useEffect} from "react"
-import {searchMovies, getPopularMovies} from "../services/api.js";
-import '../css/Home.css'
-function Home(){
-    const [searchQuery, setSearchQuery] = useState("");
-    const [movies, setMovies] = useState([])
-    const [error, setError] = useState(null);
-    const [loading, setLoading] = useState(true)
+import MovieCard from "../Components/MovieCard.jsx";
+import { useState, useEffect } from "react";
+import { searchMovies, getPopularMovies } from "../services/api.js";
+import "../css/Home.css";
 
-    useEffect(()=>{
-        const loadPopularMovies = async ()=>{
-            try{
-                const popularMovies = await getPopularMovies();
-                setMovies(popularMovies);
-            }catch(err){
-                console.log("Error: ",err)
-                setError("Failed to load Movies...")
-            }
-            finally {
-                setLoading(false)
-            }
-        }
-        
-        loadPopularMovies()
-    },[]);
-    
-    const handleSearch = async (e)=>{
-        e.preventDefault()
-        
-        if(!searchQuery.trim()) return
-        if(loading) return
+function Home() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [movies, setMovies] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-        setLoading(true)
+  useEffect(() => {
+    const loadPopularMovies = async () => {
+      try {
+        const popularMovies = await getPopularMovies();
+        setMovies(popularMovies);
+      } catch (err) {
+        console.log("Error: ", err);
+        setError("Failed to load movies...");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-        try {
-            const searchResult = await searchMovies(searchQuery)
-            setMovies(searchResult)
-            setError(null)
+    loadPopularMovies();
+  }, []);
 
-        }catch(err){
-            console.log(err)
-            setError("failed to search movies....")
-        } finally{
-             setLoading(false)
-        }
+  const handleSearch = async (e) => {
+    e.preventDefault();
 
-       
+    if (!searchQuery.trim()) return;
+
+    setLoading(true);
+
+    try {
+      const searchResult = await searchMovies(searchQuery);
+      setMovies(searchResult);
+      setError(null);
+    } catch (err) {
+      console.log(err);
+      setError("Failed to search movies...");
+    } finally {
+      setLoading(false);
     }
+  };
 
-    return(
-        <div className="home">
-            <form onSubmit={handleSearch} className="search-form">
-                <input type="text" placeholder="Search for movies..." className="search-input" value={searchQuery} onChange={(e)=> setSearchQuery(e.target.value)}/>
-                <button type="submit" className="search-btn">Search</button>
+  return (
+    <div className="home">
+      <form onSubmit={handleSearch} className="search-form">
+        <input
+          type="text"
+          placeholder="Search for movies..."
+          className="search-input"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        <button type="submit" className="search-btn">
+          Search
+        </button>
+      </form>
 
-            </form>
+      {error && <div className="error-message">{error}</div>}
 
-            {error && <div className="error-message">{error}</div>}
-
-            {loading ? (
-                <div className="loading">Loading...</div>) : (
-                <div className="movies-grid">
-                {movies.map((movie)=>
-                movie.title.toLowerCase().startsWith(searchQuery) && (
-                <MovieCard movie={movie} key={movie.id} />
-                ))}
-            </div>) }
-            
+      {loading ? (
+        <div className="loading">Loading...</div>
+      ) : (
+        <div className="movies-grid">
+          {movies.length > 0 ? (
+            movies.map((movie) => (
+              <MovieCard movie={movie} key={movie.imdbID} />
+            ))
+          ) : (
+            <p>No movies found</p>
+          )}
         </div>
-    )
+      )}
+    </div>
+  );
 }
-export default Home
+
+export default Home;
